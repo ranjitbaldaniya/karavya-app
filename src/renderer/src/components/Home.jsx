@@ -28,7 +28,7 @@ const Home = () => {
             </div>
           </Col>
         </Row>
-        <Row>
+        {/* <Row>
         <Col md={12} lg={12} sm={12} className='mb-3'>
             <div className="cardDiv">
               <Card body>
@@ -37,9 +37,9 @@ const Home = () => {
                   <Button color="dark">Click here to search-extract-ocr</Button>
                 </Link>
               </Card>
-            </div>
-          </Col>
-        </Row>
+            </div> 
+          </Col> 
+        </Row> */}
       </Container>
     </>
   )

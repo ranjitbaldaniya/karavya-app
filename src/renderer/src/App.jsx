@@ -138,7 +138,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/CreateFolder" element={<CreateFolder />} />
               <Route path="/ExtractPdf" element={<ExtractPdf />} />
-              <Route path="/search-extract-ocr" element={<PdfReader />} />
+          
             </Routes>
           </HashRouter>
           <Footer />

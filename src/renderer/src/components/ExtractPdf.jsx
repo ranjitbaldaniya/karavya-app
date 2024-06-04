@@ -10,6 +10,7 @@ const ExtractPdf = () => {
   const [pdfPath, setPdfPath] = useState('')
   const [error, setError] = useState('')
   const [isCreateButtonDisabled, setIsCreateButtonDisabled] = useState(true)
+  const [duplicateError, setDuplicateError] = useState('')
 
   const fileInputRefs = useRef([])
 
@@ -43,6 +44,14 @@ const ExtractPdf = () => {
     (index, value) => {
       const updatedFilesInfo = [...filesInfo]
       updatedFilesInfo[index].name = value
+
+      const nameExists = updatedFilesInfo.some((info, idx) => info.name === value && idx !== index)
+      if (nameExists) {
+        setDuplicateError(`The name "${value}" is already in use. Please choose a different name.`)
+      } else {
+        setDuplicateError('')
+      }
+
       setFilesInfo(updatedFilesInfo)
     },
     [filesInfo]
@@ -71,11 +80,11 @@ const ExtractPdf = () => {
     setFilesInfo([initialFileInfo])
     setPdfPath('')
     setError('')
+    setDuplicateError('')
   }
 
   const selectFolder = async () => {
     const result = await window.electron.ipcRenderer.send('select-dirs')
-    // console.log('result', result    )
     await window.electron.ipcRenderer.once('select-dirs', (event, filepath) => {
       console.log('filepath', filepath[0])
       setPdfPath(filepath[0])
@@ -85,7 +94,6 @@ const ExtractPdf = () => {
   const sendToIPCMain = async () => {
     const pdfFileName = pdfFile.name
     const uploadedFilePath = pdfFile.path
-    // Convert page ranges to individual page numbers
     const updatedFilesInfo = filesInfo.map((info) => {
       const updatedInfo = { ...info }
       const pages = info.selectedPages.split(',').map((page) => page.trim())
@@ -103,15 +111,11 @@ const ExtractPdf = () => {
       updatedInfo.selectedPages = updatedPages.join(',')
       return updatedInfo
     })
-    // console.log('updatedFilesInfo ==>', updatedFilesInfo)
     const formData = { uploadedFilePath, pdfFileName, pdfPath, updatedFilesInfo }
-    // console.log('Sending PDF file to main process...', formData)
-
     await window.electron.ipcRenderer.send('create-pdfs', formData)
   }
 
   const createPdf = async () => {
-    // Check if any required field is empty
     const isAnyFieldEmpty = filesInfo.some((info) => !info.name || !info.selectedPages)
 
     if (!pdfPath || isAnyFieldEmpty) {
@@ -128,7 +132,6 @@ const ExtractPdf = () => {
     }
   }
 
-  // Rendering logic for multiple file inputs
   const renderFileInputs = () => {
     return filesInfo.map((info, index) => (
       <Row key={index} className="mt-3 mb-3">
@@ -142,6 +145,10 @@ const ExtractPdf = () => {
             onChange={(e) => handleFileNameChange(index, e.target.value)}
             innerRef={(inputRef) => (fileInputRefs.current[index] = inputRef)}
           />
+
+          {duplicateError && index === filesInfo.length - 1 && (
+            <p className="text-danger">Duplicate Name entry not allowed</p>
+          )}
         </Col>
         <Col md="4">
           <Input
@@ -151,10 +158,9 @@ const ExtractPdf = () => {
             onChange={(e) => handleSelectedPagesChange(index, e.target.value)}
           />
         </Col>
-
         <Col md="1">
           {index === filesInfo.length - 1 && (
-            <Button color="dark" onClick={addMoreFields}>
+            <Button color="dark" onClick={addMoreFields} disabled={duplicateError}>
               Add
             </Button>
           )}
@@ -166,7 +172,6 @@ const ExtractPdf = () => {
             </Button>
           )}
         </Col>
-
         <Col md="2"></Col>
       </Row>
     ))
@@ -192,7 +197,6 @@ const ExtractPdf = () => {
           </div>
         </Col>
       </Row>
-
       {error && (
         <Row className="mt-2">
           <Col md={{ size: 6, offset: 3 }}>
@@ -217,7 +221,6 @@ const ExtractPdf = () => {
       {pdfFile && renderFileInputs()}
       {pdfFile && (
         <Row className="mb-5 mt-3">
-          {/* <Col md="6"></Col> */}
           <Col md={{ size: 10, offset: 1 }}>
             <div style={{ display: 'flex', justifyContent: 'end' }}>
               <Button

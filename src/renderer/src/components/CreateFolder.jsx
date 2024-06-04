@@ -23,7 +23,7 @@ const CreateFolder = () => {
   const [successMessage, setSuccessMessage] = useState('')
 
   const [selectedDoctors, setSelectedDoctors] = useState([])
-  // console.log("selectedDoctors ===>", selectedDoctors);
+  console.log('selectedDoctors ===>', selectedDoctors)
 
   const [selectedPath, setSelectedPath] = useState('')
 
@@ -242,8 +242,9 @@ const CreateFolder = () => {
                       </Col>
                     </Row>
                   </Col>
+                  <h4 className='text-primary'> Selected Doctors :-{selectedDoctors.length}</h4>
                 </Row>
-                <hr/>
+                <hr />
                 <Row>
                   <Col md={12}>
                     {' '}

@@ -1,11 +1,10 @@
 import { dialog } from 'electron'
-import { ensureDir, pathExists, readdir, writeFile, copyFile } from 'fs-extra'
+import { pathExists } from 'fs-extra'
+import fs from 'fs'
 import path from 'path'
 
 export const createFolders = async (selectedDoctors, selectedPath) => {
   try {
-    const rootDir = path.join(__dirname) // Adjust path as needed
-    // Ensure the selected path exists
     const exists = await pathExists(selectedPath)
     console.log('exists ==>', exists)
 
@@ -17,56 +16,68 @@ export const createFolders = async (selectedDoctors, selectedPath) => {
       })
       return
     }
+    const appFolderPath = selectedPath
 
-    // Get existing folder names
-    const existingDoctorNames = await readdir(selectedPath)
-
-    for (const doctor of selectedDoctors) {
-      const doctorFolderName = `${doctor.doctorName}`.toUpperCase() // Capitalize folder name
-
-      // Skip if folder already exists
+    const existingDoctorNames = fs.readdirSync(appFolderPath)
+    console.log('selected doctors ==>', selectedDoctors)
+    selectedDoctors.forEach((doctor) => {
+      const doctorFolderName = `${doctor.doctorName}`
       if (existingDoctorNames.includes(doctorFolderName)) {
         console.log(`${doctorFolderName} already exists, skipping...`)
-        continue
+        return
       }
 
-      const doctorFolderPath = path.join(selectedPath, doctorFolderName)
-      await ensureDir(doctorFolderPath)
+      const doctorFolderPath = path.join(appFolderPath, doctorFolderName)
+      const dateFolderPath = path.join(doctorFolderPath, doctor.todaysDate)
 
-      const formattedDate = formatDate(doctor.todaysDate) // Format date
-      const dateFolderPath = path.join(doctorFolderPath, formattedDate)
-      await ensureDir(dateFolderPath)
+      if (!fs.existsSync(doctorFolderPath)) {
+        fs.mkdirSync(doctorFolderPath, { recursive: true })
+      }
+      if (!fs.existsSync(dateFolderPath)) {
+        fs.mkdirSync(dateFolderPath, { recursive: true })
+      }
 
-      let vendorFolderPath
-      if (doctor.vendor === 'Geico') {
-        vendorFolderPath = path.join(dateFolderPath, 'GEICO')
+      console.log('doctor.vendor ==>', doctor.vendor)
+      let vendorFolderPath;
+      if (doctor.vendor === "GEICO" || doctor.vendor === "Geico" ) {
+        console.log("its calledd")
+        vendorFolderPath = path.join(dateFolderPath, "GEICO");
       } else {
-        const nonGeicoFolderPath = path.join(dateFolderPath, 'NON-GEICO')
-        await ensureDir(nonGeicoFolderPath)
-        vendorFolderPath = path.join(nonGeicoFolderPath, doctor.vendor.toUpperCase()) // Capitalize vendor name
+        const nonGeicoFolderPath = path.join(dateFolderPath, "NON-GEICO");
+        if (!fs.existsSync(nonGeicoFolderPath)) {
+          fs.mkdirSync(nonGeicoFolderPath, { recursive: true });
+        }
+        vendorFolderPath = path.join(
+          nonGeicoFolderPath,
+          doctor.vendor.toUpperCase()
+        ); // Capitalize vendor name
       }
+      const reportType = doctor.reportType === 'Retrospective' ? 'Resrospective' : 'Prospective'
+      const reportTypeFolderPath = path.join(vendorFolderPath, reportType)
 
-      const reportType = doctor.reportType === 'Retrospective' ? 'Retrospective' : 'Prospective'
-      const reportTypeFolderPath = path.join(vendorFolderPath, reportType.toUpperCase()) // Capitalize report type
-      await ensureDir(reportTypeFolderPath)
+      if (!fs.existsSync(reportTypeFolderPath)) {
+        fs.mkdirSync(reportTypeFolderPath, { recursive: true })
+      }
 
       const finalFolderPath = path.join(
         reportTypeFolderPath,
-        `${doctor.docId} ${doctor.patientName}`.toUpperCase() // Capitalize final folder name
+        `${doctor.docId} ${doctor.patientName}`
       )
-      await ensureDir(finalFolderPath)
-
-      // Copy the .docx files to the final folder
-      const docxFilePaths = [
-        path.join(__dirname, 'DIAGNOSIS.docx'),
-        path.join(__dirname, 'SPECIAL_INSTRUCTIONS.docx')
-      ]
-      for (const docxFilePath of docxFilePaths) {
-        const fileName = path.basename(docxFilePath)
-        const destinationPath = path.join(finalFolderPath, fileName)
-        await copyFile(docxFilePath, destinationPath) // Copy file content
+      if (!fs.existsSync(finalFolderPath)) {
+        fs.mkdirSync(finalFolderPath, { recursive: true })
       }
-    }
+
+      // Create the .docx files in the final folder
+      const docxFilesContent = {
+        'DAIGNOSIS.docx': '',
+        'SPECIAL_INSTRUCTIONS.docx': ''
+      }
+
+      Object.keys(docxFilesContent).forEach((fileName) => {
+        const filePath = path.join(finalFolderPath, fileName)
+        fs.writeFileSync(filePath, docxFilesContent[fileName])
+      })
+    })
 
     // Show success message
     await dialog.showMessageBox({
@@ -82,13 +93,4 @@ export const createFolders = async (selectedDoctors, selectedPath) => {
       message: 'Failed to create folders. Please try again.'
     })
   }
-}
-
-// Function to format date
-function formatDate(dateString) {
-  const parts = dateString.match(/(\d+)/g)
-  if (parts.length === 3) {
-    return `${parts[0]}.${parts[1]}.${parts[2]}`
-  }
-  return dateString // Return as is if not in expected format
 }
