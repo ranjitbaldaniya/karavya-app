@@ -84,7 +84,7 @@ function App() {
       console.log('Current date:', currentDate)
 
       //change date here
-      const fixedDate = new Date('2024-05-23')
+      const fixedDate = new Date('2024-05-30')
       console.log('Fixed date:', fixedDate)
 
       const differenceInDays = Math.floor((currentDate - fixedDate) / (1000 * 60 * 60 * 24))

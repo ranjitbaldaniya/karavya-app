@@ -1,9 +1,13 @@
 import { dialog } from 'electron'
-import { pathExists } from 'fs-extra'
+import { pathExists, copy } from 'fs-extra'
 import fs from 'fs'
 import path from 'path'
 
 export const createFolders = async (selectedDoctors, selectedPath) => {
+  const sourceDocxDirectory = path.resolve(__dirname, '../../docs')
+
+  console.log('sourceDocxDirectory ==>', sourceDocxDirectory)
+
   try {
     const exists = await pathExists(selectedPath)
     console.log('exists ==>', exists)
@@ -20,11 +24,11 @@ export const createFolders = async (selectedDoctors, selectedPath) => {
 
     const existingDoctorNames = fs.readdirSync(appFolderPath)
     console.log('selected doctors ==>', selectedDoctors)
-    selectedDoctors.forEach((doctor) => {
+    for (const doctor of selectedDoctors) {
       const doctorFolderName = `${doctor.doctorName}`
       if (existingDoctorNames.includes(doctorFolderName)) {
         console.log(`${doctorFolderName} already exists, skipping...`)
-        return
+        continue
       }
 
       const doctorFolderPath = path.join(appFolderPath, doctorFolderName)
@@ -38,19 +42,19 @@ export const createFolders = async (selectedDoctors, selectedPath) => {
       }
 
       console.log('doctor.vendor ==>', doctor.vendor)
-      let vendorFolderPath;
-      if (doctor.vendor === "GEICO" || doctor.vendor === "Geico" ) {
+      let vendorFolderPath
+      if (doctor.vendor === "GEICO" || doctor.vendor === "Geico") {
         console.log("its calledd")
-        vendorFolderPath = path.join(dateFolderPath, "GEICO");
+        vendorFolderPath = path.join(dateFolderPath, "GEICO")
       } else {
-        const nonGeicoFolderPath = path.join(dateFolderPath, "NON-GEICO");
+        const nonGeicoFolderPath = path.join(dateFolderPath, "NON-GEICO")
         if (!fs.existsSync(nonGeicoFolderPath)) {
-          fs.mkdirSync(nonGeicoFolderPath, { recursive: true });
+          fs.mkdirSync(nonGeicoFolderPath, { recursive: true })
         }
         vendorFolderPath = path.join(
           nonGeicoFolderPath,
           doctor.vendor.toUpperCase()
-        ); // Capitalize vendor name
+        ) // Capitalize vendor name
       }
       const reportType = doctor.reportType === 'Retrospective' ? 'Resrospective' : 'Prospective'
       const reportTypeFolderPath = path.join(vendorFolderPath, reportType)
@@ -67,17 +71,19 @@ export const createFolders = async (selectedDoctors, selectedPath) => {
         fs.mkdirSync(finalFolderPath, { recursive: true })
       }
 
-      // Create the .docx files in the final folder
-      const docxFilesContent = {
-        'DAIGNOSIS.docx': '',
-        'SPECIAL_INSTRUCTIONS.docx': ''
+      // Copy the .docx files from the source directory to the final folder
+      const docxFiles = ['DAIGNOSIS.docx', 'SPECIAL_INSTRUCTIONS.docx']
+      for (const fileName of docxFiles) {
+        const srcFilePath = path.join(sourceDocxDirectory, fileName)
+        const destFilePath = path.join(finalFolderPath, fileName)
+        try {
+          await copy(srcFilePath, destFilePath)
+          console.log(`Copied ${srcFilePath} to ${destFilePath}`)
+        } catch (err) {
+          console.error(`Error copying ${fileName}:`, err)
+        }
       }
-
-      Object.keys(docxFilesContent).forEach((fileName) => {
-        const filePath = path.join(finalFolderPath, fileName)
-        fs.writeFileSync(filePath, docxFilesContent[fileName])
-      })
-    })
+    }
 
     // Show success message
     await dialog.showMessageBox({
