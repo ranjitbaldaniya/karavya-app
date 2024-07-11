@@ -3,8 +3,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import Home from './components/Home'
 import CreateFolder from './components/CreateFolder'
 import ExtractPdf from './components/ExtractPdf'
-import SearchAndExtractPdfWithOcr from './components/SearchAndExtractPdfWithOcr'
-import PdfReader from './components/PdfReader'
+
 
 
 import Footer from './components/Footer'
@@ -12,9 +11,9 @@ import { useState, useEffect } from 'react'
 import { Container, Row, Col, Alert, Spinner } from 'reactstrap' // Import Spinner for loader
 
 function App() {
-  const [isValidDate, setIsValidDate] = useState(false)
+  // const [isValidDate, setIsValidDate] = useState(false)
   const [isOnline, setIsOnline] = useState(false)
-  const [currentTime, setCurrentTime] = useState(null)
+  // const [currentTime, setCurrentTime] = useState(null)
   const [isLoading, setIsLoading] = useState(true) // State for loader
 
   useEffect(() => {
@@ -54,48 +53,48 @@ function App() {
     }
   }
 
-  const fetchCurrentTime = async () => {
-    // console.log('Fetching time...')
-    try {
-      await window.electron.ipcRenderer.send('get-current-time')
-      await window.electron.ipcRenderer.once('current-time', (event, time) => {
-        setCurrentTime(time)
-        console.log('Fetching time done...', time)
-      })
-      await window.electron.ipcRenderer.once('current-time-error', (event, errorMessage) => {
-        console.error('Error:', errorMessage)
-      })
-    } catch (error) {
-      console.error('Error fetching current time:', error)
-    }
-  }
+  // const fetchCurrentTime = async () => {
+  //   // console.log('Fetching time...')
+  //   try {
+  //     await window.electron.ipcRenderer.send('get-current-time')
+  //     await window.electron.ipcRenderer.once('current-time', (event, time) => {
+  //       setCurrentTime(time)
+  //       console.log('Fetching time done...', time)
+  //     })
+  //     await window.electron.ipcRenderer.once('current-time-error', (event, errorMessage) => {
+  //       console.error('Error:', errorMessage)
+  //     })
+  //   } catch (error) {
+  //     console.error('Error fetching current time:', error)
+  //   }
+  // }
 
-  useEffect(() => {
-    if (currentTime !== null) {
-      checkDateValidity()
-    }
-  }, [currentTime])
+  // useEffect(() => {
+  //   if (currentTime !== null) {
+  //     checkDateValidity()
+  //   }
+  // }, [currentTime])
 
-  //add fixed date for validation purpose
-  const checkDateValidity = () => {
-    try {
-      if (!currentTime) return // Wait until current time is fetched
-      const currentDate = new Date(currentTime)
-      console.log('Current date:', currentDate)
+  // //add fixed date for validation purpose
+  // const checkDateValidity = () => {
+  //   try {
+  //     if (!currentTime) return // Wait until current time is fetched
+  //     const currentDate = new Date(currentTime)
+  //     console.log('Current date:', currentDate)
 
-      //change date here
-      const fixedDate = new Date('2024-05-30')
-      console.log('Fixed date:', fixedDate)
+  //     //change date here
+  //     const fixedDate = new Date('2024-05-30')
+  //     console.log('Fixed date:', fixedDate)
 
-      const differenceInDays = Math.floor((currentDate - fixedDate) / (1000 * 60 * 60 * 24))
-      console.log('Difference in days:', differenceInDays)
+  //     const differenceInDays = Math.floor((currentDate - fixedDate) / (1000 * 60 * 60 * 24))
+  //     console.log('Difference in days:', differenceInDays)
 
-      setIsValidDate(differenceInDays <= 15)
-    } catch (error) {
-      console.error('Error checking date validity:', error)
-      setIsValidDate(false)
-    }
-  }
+  //     setIsValidDate(differenceInDays <= 15)
+  //   } catch (error) {
+  //     console.error('Error checking date validity:', error)
+  //     setIsValidDate(false)
+  //   }
+  // }
 
   if (!isOnline) {
     return (
@@ -111,19 +110,19 @@ function App() {
     )
   }
 
-  if (!isValidDate) {
-    return (
-      <Container>
-        <Row className="mt-5">
-          <Col md={{ size: 6, offset: 3 }}>
-            <Alert color="danger" className="text-center">
-              Program Expired. Please contact support.
-            </Alert>
-          </Col>
-        </Row>
-      </Container>
-    )
-  }
+  // if (!isValidDate) {
+  //   return (
+  //     <Container>
+  //       <Row className="mt-5">
+  //         <Col md={{ size: 6, offset: 3 }}>
+  //           <Alert color="danger" className="text-center">
+  //             Program Expired. Please contact support.
+  //           </Alert>
+  //         </Col>
+  //       </Row>
+  //     </Container>
+  //   )
+  // }
 
   return (
     <>

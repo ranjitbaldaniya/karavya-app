@@ -42,7 +42,7 @@ const CreateFolder = () => {
         const sheetName = workbook.SheetNames[0]
         const worksheet = workbook.Sheets[sheetName]
         const parsedData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
-        // console.log("parsed xlsx data ===>", parsedData);
+        console.log("parsed xlsx data ===>", parsedData);
 
         // Filter out rows with empty data
         const filteredData = parsedData.filter(
@@ -56,7 +56,7 @@ const CreateFolder = () => {
                 cell !== undefined
             )
         )
-        console.log('filteredData ===>', filteredData)
+        // console.log('filteredData ===>', filteredData)
 
         const lastDate = filteredData[filteredData.length - 1][1]
 
@@ -80,13 +80,20 @@ const CreateFolder = () => {
         //   "Grouped data based on Today's Date:==>",
         //   groupedData["03.01.2024"]
         // );
+console.log("parsedData[0] ==>" ,  parsedData[0])
+ // Normalize the headers to lowercase
+ const headers = parsedData[0].map(header => header.toLowerCase())
+ console.log("headers ==>" ,  headers)
 
-        const docIdIndex = parsedData[0].indexOf('DOC ID')
-        const doctorNameIndex = parsedData[0].indexOf('Doctor name')
-        const todaysDateIndex = parsedData[0].indexOf("Today's Date")
-        const reportTypeIndex = parsedData[0].indexOf('Report type')
-        const patientNameIndex = parsedData[0].indexOf('Patient name')
-        const vendorIndex = parsedData[0].indexOf('vendor')
+ const docIdIndex = headers.indexOf('doc id')
+ const doctorNameIndex = headers.indexOf('doctor name')
+ const todaysDateIndex = headers.indexOf("today's date")
+ const reportTypeIndex = headers.indexOf('report type')
+ const patientNameIndex = headers.indexOf('patient name')
+ const vendorIndex = headers.indexOf('vendor')
+
+
+
         const doctorsArray = parsedData.slice(1).map((row) => ({
           docId: row[docIdIndex],
           doctorName: row[doctorNameIndex],

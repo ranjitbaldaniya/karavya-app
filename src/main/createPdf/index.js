@@ -49,9 +49,13 @@ export const CreatePdfs = async (formData) => {
       // Ensure the directory exists
       await ensureDir(normalizedPdfPath)
 
-      // Define the path for the created PDF file
-      const fileName = `${fileInfo.name}.pdf`
-      const filePath = path.join(normalizedPdfPath, fileName)
+
+      // Capitalize the first letter of the file name
+      const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+
+      const fileName = `${capitalizeFirstLetter(fileInfo.name)}.pdf`;
+      console.log("file name ===>" , fileName)
+      const filePath = path.join(normalizedPdfPath, fileName);
 
       // Write the PDF bytes to the file system
       await writeFile(filePath, newPdfBytes)

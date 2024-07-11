@@ -56,7 +56,7 @@ export const createFolders = async (selectedDoctors, selectedPath) => {
           doctor.vendor.toUpperCase()
         ) // Capitalize vendor name
       }
-      const reportType = doctor.reportType === 'Retrospective' ? 'Resrospective' : 'Prospective'
+      const reportType = doctor.reportType === 'Retrospective' ? 'Retrospective' : 'Prospective'
       const reportTypeFolderPath = path.join(vendorFolderPath, reportType)
 
       if (!fs.existsSync(reportTypeFolderPath)) {
@@ -72,7 +72,7 @@ export const createFolders = async (selectedDoctors, selectedPath) => {
       }
 
       // Copy the .docx files from the source directory to the final folder
-      const docxFiles = ['DAIGNOSIS.docx', 'SPECIAL_INSTRUCTIONS.docx']
+      const docxFiles = ['DAIGNOSIS.docx']
       for (const fileName of docxFiles) {
         const srcFilePath = path.join(sourceDocxDirectory, fileName)
         const destFilePath = path.join(finalFolderPath, fileName)
